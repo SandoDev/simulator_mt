@@ -59,9 +59,17 @@ class Simulator:
         return final_value
 
     def __input_mt(self, line: List[str]) -> Dict[Tuple[str, str], Tuple[str, str, str]]:
-        # TODO validar los caracteres que vengan
+        q, s, new_s, dir, new_q = [i.strip() for i in line]
+
+        list_dir = ['r', 'R', 'l', 'L', '*']
+        if dir not in list_dir:
+            print("Error in direction", line)
+            print("Allowed:", list_dir)
+            exit()
+        dir = dir.lower()
+
         final_value = {
-            (line[0].strip(), line[1].strip()): (line[2].strip(), line[3].strip(), line[4].strip())
+            (q, s): (new_s, dir, new_q)
         }
         return final_value
 
@@ -178,8 +186,11 @@ class Simulator:
                     pos_head += 1
                 elif dir == 'l':
                     pos_head -= 1
+                else:
+                    pass  # No move
 
         for line in self.tapes_lines:
+            print("Evaluating a new tape...")
             MT(self.dict_program, '0', self.acceptance_states, line)
 
 
