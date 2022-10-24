@@ -12,6 +12,7 @@ class Simulator:
         self.dict_program: Dict[Tuple[str, str], Any]
         self.tapes_lines: List[str]
         self.type_program: str
+        self.acceptance_states = set()
 
     def _manage_input(self) -> Tuple[str, str]:
         """
@@ -47,9 +48,13 @@ class Simulator:
         return program_lines, tapes_lines
 
     def __input_afd(self, line: List[str]) -> Dict[Tuple[str, str], str]:
-        # TODO validar los caracteres que vengan
+        q, s, n = [i.strip() for i in line]
+        if '*' in q:
+            q = q.strip('*')
+            self.acceptance_states.add(q)
+
         final_value = {
-            (line[0].strip(), line[1].strip()): line[2].strip()
+            (q, s): n
         }
         return final_value
 
@@ -111,6 +116,8 @@ class Simulator:
             self.run_mt()
 
     def run_afd(self):
+        print("... Executing AFD ...")
+        print()
         mensaje = {True: 'Aceptada', False: 'Rechazada'}
 
         def AFD(d, q0, F, tape):
@@ -122,13 +129,56 @@ class Simulator:
         for line in self.tapes_lines:
             print(
                 'La entrada', line, "es", mensaje[
-                    AFD(self.dict_program, '0', {'3'}, line) # TODO arreglar para saber el conjunto F
+                    AFD(self.dict_program, '0', self.acceptance_states, line)
                 ]
             )
 
     def run_mt(self):
-        print("run_mt")
-        print(self.dict_program, self.tapes_lines)
+        print("... Executing MT ...")
+        print()
+
+        def MT(d, q0, F, tape):
+            pos_head = 0
+            if '*' in tape:
+                pos_head = tape.find('*')
+                tape = tape[:pos_head]+tape[pos_head+1:]
+
+            print(tape)
+            tape_head = "".join([" " for _ in tape[:pos_head]]) + \
+                "^"+"".join([" " for _ in tape[pos_head+1:]])
+            print(tape_head)
+            print()
+
+            tape = list(tape)
+            stop = True
+            q = q0
+            while stop and tape:
+                symbol_r = tape[pos_head]
+
+                try:
+                    tuple_actions = d[q, symbol_r]
+                except KeyError:
+                    print("No rule for inpunt", (q, symbol_r))
+                    break
+
+                symbol_w = tuple_actions[0]
+                dir = tuple_actions[1]
+                q = tuple_actions[2]
+                tape[pos_head] = symbol_w
+
+                print("".join(tape))
+                tape_head = "".join([" " for _ in tape[:pos_head]]) + \
+                    "^"+"".join([" " for _ in tape[pos_head+1:]])
+                print(tape_head)
+                print()
+
+                if dir == "r":
+                    pos_head += 1
+                elif dir == 'l':
+                    pos_head -= 1
+
+        for line in self.tapes_lines:
+            MT(self.dict_program, '0', self.acceptance_states, line)
 
 
 def main():
