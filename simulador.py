@@ -153,8 +153,10 @@ class Simulator:
             stop = True
             q = q0
             while stop and tape:
-                symbol_r = tape[pos_head]
-
+                try:
+                    symbol_r = tape[pos_head]
+                except IndexError:
+                    break
                 try:
                     tuple_actions = d[q, symbol_r]
                 except KeyError:
