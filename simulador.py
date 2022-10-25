@@ -68,6 +68,10 @@ class Simulator:
             exit()
         dir = dir.lower()
 
+        if 'halt-' in new_q:
+            new_q = new_q.strip('halt-')
+            self.acceptance_states.add(new_q)
+
         final_value = {
             (q, s): (new_s, dir, new_q)
         }
@@ -136,7 +140,7 @@ class Simulator:
 
         for line in self.tapes_lines:
             print(
-                'La entrada', line, "es", mensaje[
+                'La entrada:', line, "es", mensaje[
                     AFD(self.dict_program, '0', self.acceptance_states, line)
                 ]
             )
@@ -144,6 +148,7 @@ class Simulator:
     def run_mt(self):
         print("... Executing MT ...")
         print()
+        mensaje = {True: 'Aceptada', False: 'Rechazada', None: 'Rechazada'}
 
         def MT(d, q0, F, tape):
             pos_head = 0
@@ -189,9 +194,16 @@ class Simulator:
                 else:
                     pass  # No move
 
+                if q in self.acceptance_states:
+                    return True
+
         for line in self.tapes_lines:
             print("Evaluating a new tape...")
-            MT(self.dict_program, '0', self.acceptance_states, line)
+            print(
+                'La entrada:', line, "es", mensaje[
+                    MT(self.dict_program, '0', self.acceptance_states, line)
+                ]
+            )
 
 
 def main():
