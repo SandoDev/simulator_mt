@@ -194,8 +194,8 @@ class Simulator:
                 else:
                     pass  # No move
 
-                if q in self.acceptance_states:
-                    return True
+            if q in self.acceptance_states:
+                return True
 
         for line in self.tapes_lines:
             print("Evaluating a new tape...")
